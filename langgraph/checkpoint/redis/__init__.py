@@ -1678,7 +1678,8 @@ class RedisSaver(BaseRedisSaver[Union[Redis, RedisCluster], SearchIndex]):
             thread_ids: Thread IDs whose old checkpoints should be pruned.
             strategy: Pruning strategy.  ``"keep_latest"`` retains only the
                 most recent checkpoint per namespace (default).  ``"delete"``
-                removes all checkpoints for the thread.
+                removes all checkpoints for the thread.  Any other value
+                raises ``ValueError``.
             keep_last: Optional override — number of recent checkpoints to
                 retain per namespace.  When provided, takes precedence over
                 ``strategy``.  Use ``keep_last=0`` to remove all checkpoints.
@@ -1693,6 +1694,10 @@ class RedisSaver(BaseRedisSaver[Union[Redis, RedisCluster], SearchIndex]):
                 keep_last = 1
 
         # Validate input
+        if strategy not in ("keep_latest", "delete"):
+            raise ValueError(
+                f"``strategy`` must be 'keep_latest' or 'delete', got {strategy!r}"
+            )
         if not thread_ids:
             raise ValueError("``thread_ids`` must be a non-empty sequence")
         if keep_last < 0:

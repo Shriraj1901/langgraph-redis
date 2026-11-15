@@ -972,7 +972,8 @@ class AsyncShallowRedisSaver(BaseRedisSaver[AsyncRedis, AsyncSearchIndex]):
         Args:
             thread_ids: Thread IDs to prune.
             strategy: Pruning strategy.  ``"keep_latest"`` is a no-op for
-                shallow savers (default).  ``"delete"`` removes all.
+                shallow savers (default).  ``"delete"`` removes all.  Any
+                other value raises ``ValueError``.
             keep_last: Optional override.  Any value >= 1 is a no-op.
                 Pass ``0`` to delete all.
         """
@@ -984,6 +985,10 @@ class AsyncShallowRedisSaver(BaseRedisSaver[AsyncRedis, AsyncSearchIndex]):
                 keep_last = 1
 
         # Validate input
+        if strategy not in ("keep_latest", "delete"):
+            raise ValueError(
+                f"``strategy`` must be 'keep_latest' or 'delete', got {strategy!r}"
+            )
         if not thread_ids:
             raise ValueError("``thread_ids`` must be a non-empty sequence")
 
